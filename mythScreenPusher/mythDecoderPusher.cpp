@@ -40,6 +40,8 @@ void mythDecoderPusher::start()
 				}
 			}
 		}
+		delete baseclient;
+		delete people;
 	}
 }
 

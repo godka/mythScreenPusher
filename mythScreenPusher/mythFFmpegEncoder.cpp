@@ -67,10 +67,10 @@ bool mythFFmpegEncoder::Init(){
 	}
 	c = avcodec_alloc_context3(video_codec);
 	AVDictionary *opts = NULL;
-	//av_dict_set(&opts, "b", "2.5M", 0);
+	av_dict_set(&opts, "b", "0.5M", 0);
 	c->width = mwidth;
 	c->height = mheight;
-	c->bit_rate = 400000;
+	c->bit_rate = 100000;
 	c->gop_size = 25;
 	AVRational ration = { 1, 25 };
 	c->time_base = ration;

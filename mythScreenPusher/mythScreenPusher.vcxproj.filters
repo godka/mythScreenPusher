@@ -68,6 +68,9 @@
     <ClInclude Include="mythScreenDecoder.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="avcodec.lib" />
@@ -81,5 +84,6 @@
     <Library Include="SDL2main.lib" />
     <Library Include="swresample.lib" />
     <Library Include="swscale.lib" />
+    <Library Include="cyclops-rtmp.lib" />
   </ItemGroup>
 </Project>

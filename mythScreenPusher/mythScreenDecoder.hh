@@ -2,6 +2,7 @@
 #include "mythconfig.hh"
 #include "mythVirtualDecoder.hh"
 #include "mythFFmpegEncoder.hh"
+#include "dll.h"
 class mythScreenDecoder :
 	public mythVirtualDecoder
 {
@@ -18,10 +19,13 @@ protected:
 	int decodethread();
 	mythScreenDecoder();
 	static int decodethreadstatic(void* data);
+	static int pushthreadstatic(void* data);
+	int pushthread();
 	mythFFmpegEncoder* encoder;
 	SDL_Thread* startthread;
 	SDL_mutex* startmutex;
 private:
+	void* ptr;
 	void show_dshow_device();
 	void show_avfoundation_device();
 	int Init();
@@ -32,5 +36,6 @@ private:
 	AVFrame	*pFrame;
 	AVPacket packet;
 	int videoindex;
+	FILE* file;
 };
 

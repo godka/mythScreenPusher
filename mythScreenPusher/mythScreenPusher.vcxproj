@@ -90,6 +90,7 @@
     <ClCompile Include="PEOPLE.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="dll.h" />
     <ClInclude Include="mythAvlist.hh" />
     <ClInclude Include="mythBaseClient.hh" />
     <ClInclude Include="MythConfig.hh" />
@@ -105,6 +106,7 @@
     <Library Include="avfilter.lib" />
     <Library Include="avformat.lib" />
     <Library Include="avutil.lib" />
+    <Library Include="cyclops-rtmp.lib" />
     <Library Include="postproc.lib" />
     <Library Include="SDL2.lib" />
     <Library Include="SDL2main.lib" />

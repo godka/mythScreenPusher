@@ -9,7 +9,10 @@ mythScreenDecoder::mythScreenDecoder()
 	startthread = NULL;
 	encoder = NULL;
 	startmutex = SDL_CreateMutex();
+	ptr = RTMPInit("rtmp://localhost/live/stream");
 	Init();
+	file = fopen("test.h264", "wb");
+
 }
 
 //Show Dshow Device
@@ -109,7 +112,8 @@ int mythScreenDecoder::Init(){
 }
 void mythScreenDecoder::start()
 {
-	startthread = SDL_CreateThread(decodethreadstatic, "decode", this);
+	startthread = SDL_CreateThread(pushthreadstatic, "decode", this);
+	decodethreadstatic(this);
 }
 
 int mythScreenDecoder::decodethread()
@@ -167,6 +171,20 @@ int mythScreenDecoder::decodethreadstatic(void* data)
 	return 0;
 }
 
+int mythScreenDecoder::pushthreadstatic(void* data)
+{
+
+	mythScreenDecoder* decoder = (mythScreenDecoder*) data;
+	decoder->pushthread();
+	return 0;
+}
+
+int mythScreenDecoder::pushthread()
+{
+	RTMPStart(ptr);
+	return 0;
+}
+
 void mythScreenDecoder::stop()
 {
 	flag = 1;
@@ -183,5 +201,8 @@ void mythScreenDecoder::staticresponse(void *myth, char* pdata, int plength)
 
 void mythScreenDecoder::response(char* pdata, int plength)
 {
-	put((unsigned char*) pdata, (unsigned int) plength);
+	RTMPPutH264Data(ptr,pdata, plength);
+	fwrite(pdata, plength, 1, file);
+	//put((unsigned char*) pdata, (unsigned int) plength);
+
 }

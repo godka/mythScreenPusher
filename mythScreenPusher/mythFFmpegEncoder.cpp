@@ -67,10 +67,10 @@ bool mythFFmpegEncoder::Init(){
 	}
 	c = avcodec_alloc_context3(video_codec);
 	AVDictionary *opts = NULL;
-	av_dict_set(&opts, "b", "0.5M", 0);
+	av_dict_set(&opts, "b", "2.5M", 0);
 	c->width = mwidth;
 	c->height = mheight;
-	c->bit_rate = 100000;
+	//c->bit_rate = 2500000;
 	c->gop_size = 25;
 	AVRational ration = { 1, 25 };
 	c->time_base = ration;
@@ -78,7 +78,7 @@ bool mythFFmpegEncoder::Init(){
 	c->max_b_frames = 1;
 
 	av_opt_set(c->priv_data, "preset", "ultrafast", 0);   //ultrafast,superfast, veryfast, faster, fast, medium, slow, slower, veryslow,placebo.
-	//av_opt_set(c->priv_data, "profile", "high", 0);        //baseline main high
+	av_opt_set(c->priv_data, "profile", "baseline", 0);        //baseline main high
 	//av_opt_set(c->priv_data, "level", "4.0", 0);
 	av_opt_set(c->priv_data, "tune", "zerolatency", 0); //  tune
 

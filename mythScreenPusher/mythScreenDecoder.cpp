@@ -9,12 +9,11 @@ mythScreenDecoder::mythScreenDecoder()
 	startthread = NULL;
 	encoder = NULL;
 	startmutex = SDL_CreateMutex();
-	ptr = RTMPInit("rtmp://localhost/live/stream");
+	//ptr = RTMPInit("rtmp://localhost/live/stream");
 	Init();
-	file = fopen("test.h264", "wb");
+	pts = 0; dts = 0;
 
 }
-
 //Show Dshow Device
 void mythScreenDecoder::show_dshow_device(){
 	AVFormatContext *pFormatCtx = avformat_alloc_context();
@@ -39,7 +38,9 @@ void mythScreenDecoder::show_avfoundation_device(){
 
 int mythScreenDecoder::SetupFormat(const char* short_name,const char* filename){
 	AVInputFormat *ifmt = av_find_input_format(short_name);
-	if (avformat_open_input(&pFormatCtx, filename, ifmt, NULL) != 0){
+	AVDictionary* options = NULL;
+	av_dict_set(&options, "framerate", "30", 0);
+	if (avformat_open_input(&pFormatCtx, filename, ifmt, &options) != 0){
 		printf("Couldn't open input stream.\n");
 		return -1;
 	}
@@ -56,6 +57,28 @@ mythScreenDecoder::~mythScreenDecoder()
 		SDL_DestroyMutex(startmutex);
 	}
 }
+
+int mythScreenDecoder::InitSrsRTMP(const char* rtmpurl) {
+	do {
+		rtmp = srs_rtmp_create(rtmpurl);
+
+		if (srs_rtmp_handshake(rtmp) != 0) {
+			break;
+		}
+
+		if (srs_rtmp_connect_app(rtmp) != 0) {
+			break;
+		}
+		int ret = srs_rtmp_publish_stream(rtmp);
+		if (ret != 0) {
+			break;
+		}
+		return 0;
+	} while (0);
+
+	return 1;
+}
+
 #define USE_DSHOW 0
 int mythScreenDecoder::Init(){
 
@@ -126,7 +149,7 @@ int mythScreenDecoder::decodethread()
 	int width = 0, height = 0;
 	while (flag == 0){
 		SDL_PollEvent(NULL);
-		if (av_read_frame(pFormatCtx, &packet) >= 0){
+		if (av_read_frame(pFormatCtx, &packet) >= 0){	//6-7
 			if (packet.stream_index == videoindex){
 				int ret = avcodec_decode_video2(pCodecCtx, pFrame, &got_picture, &packet);
 				if (ret < 0){
@@ -138,7 +161,7 @@ int mythScreenDecoder::decodethread()
 						width = pFrame->width;
 						height = pFrame->height;
 						encoder = mythFFmpegEncoder::CreateNew(this,
-							width,height);
+							width, height);
 						yy = new char[width * height];
 						uu = new char[width * height / 4];
 						vv = new char[width * height / 4];
@@ -147,11 +170,12 @@ int mythScreenDecoder::decodethread()
 						tmpsrc[2] = vv;
 					}
 					int tmplinesize [] = { width, width / 2, width / 2 };
-					mythFFmpegEncoder::RGB2yuv(width, height, pFrame->linesize[0], pFrame->data[0], (void**) tmpsrc);
-					encoder->ProcessFrame((unsigned char**) tmpsrc, tmplinesize, mythScreenDecoder::staticresponse);
+					encoder->InnerRGB2yuv(width, height, pFrame->linesize[0], pFrame->data[0], (void**) tmpsrc);
+					encoder->ProcessFrame((unsigned char**) tmpsrc, tmplinesize, staticresponse);
 				}
 			}
 			av_free_packet(&packet);
+			//SDL_Delay(40);
 		}
 		SDL_Delay(1);
 	}
@@ -181,7 +205,35 @@ int mythScreenDecoder::pushthreadstatic(void* data)
 
 int mythScreenDecoder::pushthread()
 {
-	RTMPStart(ptr);
+	InitSrsRTMP("rtmp://localhost/live/stream");
+	int time = SDL_GetTicks();
+	for (;;){
+		PacketQueue* pkt = get();
+		if (pkt){
+			int time2 = SDL_GetTicks();
+			pts = dts += (time2 - time);
+			//printf("Push length:%6d£¬timespan=%6dms\n", pkt->h264PacketLength,(time2 - time));
+			time = time2;
+			int ret = srs_h264_write_raw_frames(rtmp, (char*) pkt->h264Packet, pkt->h264PacketLength, dts, pts);
+			if (ret != 0) {
+				if (srs_h264_is_dvbsp_error(ret)) {
+					printf("ignore drop video error, code=%d\n", ret);
+				}
+				else if (srs_h264_is_duplicated_sps_error(ret)) {
+					printf("ignore duplicated sps, code=%d\n", ret);
+				}
+				else if (srs_h264_is_duplicated_pps_error(ret)) {
+					printf("ignore duplicated pps, code=%d\n", ret);
+				}
+				else {
+					printf("send h264 raw data failed. code=%d\n", ret);
+					break;
+				}
+			}
+		}
+		SDL_Delay(1);
+	}
+	//RTMPStart(ptr);
 	return 0;
 }
 
@@ -201,8 +253,10 @@ void mythScreenDecoder::staticresponse(void *myth, char* pdata, int plength)
 
 void mythScreenDecoder::response(char* pdata, int plength)
 {
-	RTMPPutH264Data(ptr,pdata, plength);
-	fwrite(pdata, plength, 1, file);
-	//put((unsigned char*) pdata, (unsigned int) plength);
+	//printf("Push one frame,size=plength:%d\n",plength);
+	//pts = dts += 40;
+	//int ret = srs_h264_write_raw_frames(rtmp, (char*) pdata, plength, dts, pts);
+	//RTMPPutH264Data(ptr,pdata, plength);
+	put((unsigned char*) pdata, (unsigned int) plength);
 
 }

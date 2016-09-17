@@ -8,6 +8,7 @@ mythFFmpegEncoder::mythFFmpegEncoder(void* phwnd, int width, int height)
 	this->c = NULL;
 	this->frame = NULL;
 	hwnd = phwnd;
+	img_convert_ctx = NULL;
 	Init();
 }
 
@@ -19,7 +20,24 @@ void mythFFmpegEncoder::yuv2RGB(int width, int height,
 	yuv2RGB(width, height, (const void**) &src, src_linesize, dst);
 	return;
 }
+void mythFFmpegEncoder::InnerRGB2yuv(int width, int height, int stride, const void* src, void** dst){
+	if (!img_convert_ctx){
+		img_convert_ctx = sws_getContext(
+			width, height, PIX_FMT_BGRA,
+			width, height, PIX_FMT_YUV420P,
+			SWS_FAST_BILINEAR, NULL, NULL, NULL);
 
+	}
+	uint8_t *rgb_src[3] = { (uint8_t *) src, NULL, NULL };
+	int srcwidth [] = { stride, 0, 0 };
+	int dstwidth [] = { width, width / 2, width / 2 };
+	if (img_convert_ctx){
+		sws_scale(img_convert_ctx, (const uint8_t *const*) rgb_src, srcwidth, 0, height,
+			(uint8_t *const*) dst, dstwidth);
+	}
+	//sws_freeContext(img_convert_ctx);
+	return;
+}
 void mythFFmpegEncoder::RGB2yuv(int width, int height, int stride,const void* src, void** dst){
 	struct SwsContext *img_convert_ctx = sws_getContext(
 		width , height, PIX_FMT_BGRA,
@@ -29,10 +47,10 @@ void mythFFmpegEncoder::RGB2yuv(int width, int height, int stride,const void* sr
 
 	int srcwidth [] = { stride, 0, 0 };
 	int dstwidth [] = { width, width / 2, width / 2 };
-	if (img_convert_ctx){
-		sws_scale(img_convert_ctx, (const uint8_t *const*) rgb_src, srcwidth, 0, height,
-			(uint8_t *const*) dst, dstwidth);
-	}
+	//if (img_convert_ctx){
+	//	sws_scale(img_convert_ctx, (const uint8_t *const*) rgb_src, srcwidth, 0, height,
+	//		(uint8_t *const*) dst, dstwidth);
+	//}
 	sws_freeContext(img_convert_ctx);
 	return;
 }
@@ -67,16 +85,16 @@ bool mythFFmpegEncoder::Init(){
 	}
 	c = avcodec_alloc_context3(video_codec);
 	AVDictionary *opts = NULL;
-	av_dict_set(&opts, "b", "2.5M", 0);
+	//av_dict_set(&opts, "b", "0.5M", 0);
 	c->width = mwidth;
 	c->height = mheight;
-	//c->bit_rate = 2500000;
-	c->gop_size = 25;
-	AVRational ration = { 1, 25 };
-	c->time_base = ration;
-	c->pix_fmt = PIX_FMT_YUV420P;
-	c->max_b_frames = 1;
-
+	//c->bit_rate = 400000;
+	c->bit_rate = 2000;
+	c->gop_size = 30;
+	c->time_base.den = 1;
+	c->time_base.num = 30;
+	c->pix_fmt = AV_PIX_FMT_YUV420P;
+	c->max_b_frames = 0;
 	av_opt_set(c->priv_data, "preset", "ultrafast", 0);   //ultrafast,superfast, veryfast, faster, fast, medium, slow, slower, veryslow,placebo.
 	av_opt_set(c->priv_data, "profile", "baseline", 0);        //baseline main high
 	//av_opt_set(c->priv_data, "level", "4.0", 0);
@@ -124,6 +142,7 @@ void mythFFmpegEncoder::ProcessFrame(unsigned char** src, int* srclinesize, resp
 
 	avpkt.data = NULL;
 	avpkt.size = 0;
+	//frame->pts += 40;
 	for (int i = 0; i < 3; i++){
 		frame->data[i] = src[i];
 		frame->linesize[i] = srclinesize[i];
@@ -138,6 +157,33 @@ void mythFFmpegEncoder::ProcessFrame(unsigned char** src, int* srclinesize, resp
 	if (got_frame){
 		//callback
 		response(this->hwnd, (char*) avpkt.data, avpkt.size);
+	}
+	else{
+		printf("encode failed\n");
+	}
+	//}
+}
+
+void mythFFmpegEncoder::ProcessFrame(unsigned char** src, int* srclinesize, PacketHandler* response)
+{
+
+	avpkt.data = NULL;
+	avpkt.size = 0;
+	//frame->pts += 40;
+	for (int i = 0; i < 3; i++){
+		frame->data[i] = src[i];
+		frame->linesize[i] = srclinesize[i];
+	}
+	if (c == NULL && frame == NULL)return;
+	//while (avpkt.size > 0) {
+	int got_frame = 0;
+	int len = avcodec_encode_video2(c, &avpkt, frame, &got_frame);
+	if (len < 0) {
+		return;
+	}
+	if (got_frame){
+		//callback
+		response(this->hwnd, &avpkt);
 	}
 	else{
 		printf("encode failed\n");

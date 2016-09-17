@@ -82,23 +82,22 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mythAvlist.cpp" />
-    <ClCompile Include="mythBaseClient.cpp" />
-    <ClCompile Include="mythDecoderPusher.cpp" />
     <ClCompile Include="mythFFmpegEncoder.cpp" />
+    <ClCompile Include="mythScreenCapture.cpp" />
     <ClCompile Include="mythScreenDecoder.cpp" />
     <ClCompile Include="mythVirtualDecoder.cpp" />
     <ClCompile Include="PEOPLE.cpp" />
+    <ClCompile Include="srs_librtmp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="dll.h" />
     <ClInclude Include="mythAvlist.hh" />
-    <ClInclude Include="mythBaseClient.hh" />
     <ClInclude Include="MythConfig.hh" />
-    <ClInclude Include="mythDecoderPusher.hh" />
     <ClInclude Include="mythFFmpegEncoder.hh" />
+    <ClInclude Include="mythScreenCapture.hh" />
     <ClInclude Include="mythScreenDecoder.hh" />
     <ClInclude Include="mythVirtualDecoder.hh" />
     <ClInclude Include="PEOPLE.hh" />
+    <ClInclude Include="srs_librtmp.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="avcodec.lib" />
@@ -106,7 +105,6 @@
     <Library Include="avfilter.lib" />
     <Library Include="avformat.lib" />
     <Library Include="avutil.lib" />
-    <Library Include="cyclops-rtmp.lib" />
     <Library Include="postproc.lib" />
     <Library Include="SDL2.lib" />
     <Library Include="SDL2main.lib" />

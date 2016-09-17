@@ -21,12 +21,6 @@
     <ClCompile Include="mythAvlist.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="mythBaseClient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="mythDecoderPusher.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="mythFFmpegEncoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -42,18 +36,18 @@
     <ClCompile Include="mythScreenDecoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="srs_librtmp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mythScreenCapture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mythAvlist.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mythBaseClient.hh">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MythConfig.hh">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mythDecoderPusher.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="mythFFmpegEncoder.hh">
@@ -68,7 +62,10 @@
     <ClInclude Include="mythScreenDecoder.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dll.h">
+    <ClInclude Include="srs_librtmp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mythScreenCapture.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -84,6 +81,5 @@
     <Library Include="SDL2main.lib" />
     <Library Include="swresample.lib" />
     <Library Include="swscale.lib" />
-    <Library Include="cyclops-rtmp.lib" />
   </ItemGroup>
 </Project>

@@ -4,11 +4,11 @@ typedef struct PacketQueue {
     unsigned char* h264Packet;
 	unsigned int h264PacketLength;
 	//only for mobile
-    //unsigned char* YY;
-    //unsigned char* UU;
-    //unsigned char* VV;
-    //unsigned int width,height;
-    //unsigned int Ydatasize,Udatasize,Vdatasize;
+    unsigned char* YY;
+    unsigned char* UU;
+    unsigned char* VV;
+    unsigned int width,height;
+    unsigned int Ydatasize,Udatasize,Vdatasize;
 } PacketQueue;
 class mythAvlist
 {

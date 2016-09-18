@@ -33032,7 +33032,8 @@ struct Context
 		//delete [] tmpPacket;
 		return nsent;
     }
-    
+    //debug 16.1-17
+	//release 15-16
     ////////////////////////   strlcpy.c (modified) //////////////////////////
     
     /*    $OpenBSD: strlcpy.c,v 1.11 2006/05/05 15:27:38 millert Exp $    */

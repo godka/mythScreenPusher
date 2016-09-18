@@ -2,6 +2,7 @@
 #include "mythconfig.hh"
 #include "mythVirtualDecoder.hh"
 #include "mythFFmpegEncoder.hh"
+#include "mythScreenCapture.hh"
 #include "srs_librtmp.h"
 //#include "dll.h"
 class mythScreenDecoder :
@@ -28,16 +29,6 @@ protected:
 	SDL_mutex* startmutex;
 private:
 	//void* ptr;
-	void show_dshow_device();
-	void show_avfoundation_device();
-	int Init();
-	int SetupFormat(const char* short_name, const char* filename);
-	AVFormatContext	*pFormatCtx;
-	AVCodecContext	*pCodecCtx;
-	AVCodec			*pCodec;
-
-	AVFrame	*pFrame;
-	AVPacket packet;
 	int videoindex;
 	FILE* file;
 	int64_t start_time;

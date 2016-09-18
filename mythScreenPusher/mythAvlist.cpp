@@ -82,7 +82,7 @@ PacketQueue *mythAvlist::get(int freePacket){
 		tmp = NULL;
 	}else{
 		tmp = &this->ListPacket[this->listread];
-		if(tmp->h264Packet == NULL){
+		if(tmp->h264Packet == NULL && tmp->YY == NULL){
 			tmp = NULL;
 		}else{
 			if(freePacket == 0){
@@ -106,7 +106,7 @@ unsigned char* mythAvlist::putcore(unsigned char* data,unsigned int datasize){
 	//printf("totalptr = %d\n",totalptr);
 	return (totalbuffer + totalptr - datasize);
 }
-/*
+
 int mythAvlist::put(unsigned char** dataline,unsigned int *datasize,unsigned int width,unsigned int height){
 	SDL_LockMutex(this->mutex);
 	if(listwrite >= AVFRAMECOUNT)listwrite = 0;
@@ -129,7 +129,7 @@ int mythAvlist::put(unsigned char** dataline,unsigned int *datasize,unsigned int
 	SDL_UnlockMutex(this->mutex);
 	return 0;
 }
-*/
+
 int mythAvlist::release(PacketQueue *pack)
 {
 	return 0;
@@ -140,9 +140,9 @@ int mythAvlist::put(unsigned char* data,unsigned int length){
 	if(listwrite >= AVFRAMECOUNT)listwrite = 0;
 	PacketQueue *tmp = &ListPacket[listwrite];
 
-	//tmp->YY = NULL;
-	//tmp->UU = NULL;
-	//tmp->VV = NULL;
+	tmp->YY = NULL;
+	tmp->UU = NULL;
+	tmp->VV = NULL;
 
 	tmp->h264PacketLength = length;
 	tmp->h264Packet = putcore(data, length);

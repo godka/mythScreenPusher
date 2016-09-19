@@ -10,6 +10,8 @@ mythFFmpegEncoder::mythFFmpegEncoder(void* phwnd, int width, int height)
 	hwnd = phwnd;
 	img_convert_ctx = NULL;
 	Init();
+	FullYUVBuffer = NULL;
+	InitFullYUVBuffer();
 }
 
 void mythFFmpegEncoder::yuv2RGB(int width, int height,
@@ -20,6 +22,28 @@ void mythFFmpegEncoder::yuv2RGB(int width, int height,
 	yuv2RGB(width, height, (const void**) &src, src_linesize, dst);
 	return;
 }
+
+void mythFFmpegEncoder::SuperFastRGB2yuv(int width, int height, int stride, const void* src, void** dst)
+{
+	int index = 0, uIndex = 0,vindex = 0;
+	unsigned int* tmp = (unsigned int*)src;
+	for (int i = 0; i < height; i++){
+		for (int j = 0; j < width; j++){
+			YUVSingle* single = &FullYUVBuffer[tmp[index] & 0x00ffffff];
+			((unsigned char**) dst)[0][index++] = single->YY;
+			if (j % 2 == 0){
+				if (i % 2 == 0){
+					((unsigned char**) dst)[1][uIndex++] = single->UU;
+				}
+				else{
+					((unsigned char**) dst)[2][vindex++] = single->VV;
+				}
+				// u∑÷¡ø  
+			}
+		}
+	}
+}
+
 void mythFFmpegEncoder::InnerRGB2yuv(int width, int height, int stride, const void* src, void** dst){
 	if (!img_convert_ctx){
 		img_convert_ctx = sws_getContext(
@@ -71,6 +95,30 @@ mythFFmpegEncoder* mythFFmpegEncoder::CreateNew(void* phwnd, int width, int heig
 {
 	return new mythFFmpegEncoder(phwnd, width, height);
 }
+
+void mythFFmpegEncoder::InitFullYUVBuffer()
+{
+	FullYUVBuffer = new YUVSingle[256 * 256 * 256];
+	YUVSingle* p = FullYUVBuffer;
+	for (int r = 0; r < 256; r++){
+		for (int g = 0; g < 256; g++){
+			for (int b = 0; b < 256; b++){
+				int y = (int) ((66 * r + 129 * g + 25 * b + 128) >> 8) + 16;
+				int u = (int) ((-38 * r - 74 * g + 112 * b + 128) >> 8) + 128;
+				int v = (int) ((112 * r - 94 * g - 18 * b + 128) >> 8) + 128;
+				if (y > 255)y = 255; if (y < 0)y = 0;
+				if (u > 255)u = 255; if (u < 0)u = 0;
+				if (v > 255)v = 255; if (v < 0)v = 0;
+				p->YY = y;
+				p->UU = u;
+				p->VV = v;
+				p++;
+			}
+		}
+	}
+	printf("Init YUV Buffer Success!\n");
+}
+
 bool mythFFmpegEncoder::Init(){
 	//if it has been initialized before, we should do cleanup first
 	Cleanup();
@@ -90,9 +138,9 @@ bool mythFFmpegEncoder::Init(){
 	c->height = mheight;
 	//c->bit_rate = 400000;
 	c->bit_rate = 2000;
-	c->gop_size = 30;
+	c->gop_size = 25;
 	c->time_base.den = 1;
-	c->time_base.num = 30;
+	c->time_base.num = 25;
 	c->pix_fmt = AV_PIX_FMT_YUV420P;
 	c->max_b_frames = 0;
 	av_opt_set(c->priv_data, "preset", "ultrafast", 0);   //ultrafast,superfast, veryfast, faster, fast, medium, slow, slower, veryslow,placebo.
@@ -122,6 +170,8 @@ bool mythFFmpegEncoder::Init(){
 mythFFmpegEncoder::~mythFFmpegEncoder(void)
 {
 	Cleanup();
+	if (FullYUVBuffer)
+		delete [] FullYUVBuffer;
 }
 void mythFFmpegEncoder::Cleanup(){
 	//if (avpkt != NULL){

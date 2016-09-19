@@ -26,7 +26,6 @@ protected:
 	int pushthread();
 	mythFFmpegEncoder* encoder;
 	SDL_Thread* startthread;
-	SDL_mutex* startmutex;
 private:
 	//void* ptr;
 	int videoindex;

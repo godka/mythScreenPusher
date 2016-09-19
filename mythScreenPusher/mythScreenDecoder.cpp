@@ -6,9 +6,7 @@ mythScreenDecoder::mythScreenDecoder()
 	:mythVirtualDecoder()
 {
 	flag = 0;
-	startthread = NULL;
 	encoder = NULL;
-	startmutex = SDL_CreateMutex();
 	//ptr = RTMPInit("rtmp://localhost/live/stream");
 	//Init();
 	pts = 0; dts = 0;
@@ -21,9 +19,6 @@ mythScreenDecoder::~mythScreenDecoder()
 		encoder->Cleanup();
 		delete encoder;
 		encoder = NULL;
-	}
-	if (startmutex){
-		SDL_DestroyMutex(startmutex);
 	}
 }
 
@@ -77,7 +72,7 @@ int mythScreenDecoder::decodethread()
 	while (flag == 0){
 		unsigned int t1 = SDL_GetTicks();
 		char* t = cap->capture();
-		encoder->InnerRGB2yuv(width, height, width * 4, t, (void**) tmpsrc);
+		encoder->SuperFastRGB2yuv(width, height, width * 4, t, (void**) tmpsrc);
 		encoder->ProcessFrame((unsigned char**) tmpsrc, tmplinesize,staticresponse);
 		unsigned int t2 = SDL_GetTicks();
 		unsigned int delay = 40 - (t2 - t1);
@@ -145,8 +140,6 @@ int mythScreenDecoder::pushthread()
 void mythScreenDecoder::stop()
 {
 	flag = 1;
-	if (startthread)
-		SDL_WaitThread(startthread, NULL);
 }
 
 void mythScreenDecoder::staticresponse(void *myth, char* pdata, int plength)

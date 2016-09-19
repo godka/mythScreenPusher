@@ -35,6 +35,13 @@ extern "C"{
 #pragma comment( lib, "wsock32.lib")  
 #pragma comment( lib, "vfw32.lib")  
 */
+//#define SUPERFASTYUV 1
+typedef struct YUVSingle
+{
+	unsigned char YY;
+	unsigned char UU;
+	unsigned char VV;
+};
 class mythFFmpegEncoder
 {
 public:
@@ -52,6 +59,7 @@ public:
 		const void* ysrc, const void* usrc, const void* vsrc,
 		int ysize, int usize, int vsize, void** dst);
 
+	void SuperFastRGB2yuv(int width, int height, int stride, const void* src, void** dst);
 	void InnerRGB2yuv(int width, int height, int stride, const void* src, void** dst);
 	AVCodecContext* getC(){
 		return c;
@@ -71,5 +79,7 @@ protected:
 	int mheight;
 private:
 	struct SwsContext *img_convert_ctx;
+	YUVSingle* FullYUVBuffer;
+	void InitFullYUVBuffer();
 };
 

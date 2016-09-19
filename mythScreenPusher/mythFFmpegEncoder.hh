@@ -41,6 +41,7 @@ typedef struct YUVSingle
 	unsigned char YY;
 	unsigned char UU;
 	unsigned char VV;
+	//unsigned char None;
 };
 class mythFFmpegEncoder
 {

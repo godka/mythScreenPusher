@@ -27,16 +27,21 @@ void mythFFmpegEncoder::SuperFastRGB2yuv(int width, int height, int stride, cons
 {
 	int index = 0, uIndex = 0,vindex = 0;
 	unsigned int* tmp = (unsigned int*)src;
+	unsigned char* yplanar = (unsigned char*) dst[0];
+	unsigned char* uplanar = (unsigned char*) dst[1];
+	unsigned char* vplanar = (unsigned char*) dst[2];
 	for (int i = 0; i < height; i++){
 		for (int j = 0; j < width; j++){
-			YUVSingle* single = &FullYUVBuffer[tmp[index] & 0x00ffffff];
-			((unsigned char**) dst)[0][index++] = single->YY;
+			YUVSingle* single = &FullYUVBuffer[*tmp & 0x00ffffff]; tmp++;
+			*yplanar = single->YY; yplanar++;
 			if (j % 2 == 0){
 				if (i % 2 == 0){
-					((unsigned char**) dst)[1][uIndex++] = single->UU;
+					*uplanar = single->UU; uplanar++;
+					//((unsigned char**) dst)[1][uIndex++] = single->UU;
 				}
 				else{
-					((unsigned char**) dst)[2][vindex++] = single->VV;
+					*vplanar = single->VV; vplanar++;
+					//((unsigned char**) dst)[2][vindex++] = single->VV;
 				}
 				// u∑÷¡ø  
 			}

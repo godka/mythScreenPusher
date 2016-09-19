@@ -25,7 +25,6 @@ void mythFFmpegEncoder::yuv2RGB(int width, int height,
 
 void mythFFmpegEncoder::SuperFastRGB2yuv(int width, int height, int stride, const void* src, void** dst)
 {
-	int index = 0, uIndex = 0,vindex = 0;
 	unsigned int* tmp = (unsigned int*)src;
 	unsigned char* yplanar = (unsigned char*) dst[0];
 	unsigned char* uplanar = (unsigned char*) dst[1];
@@ -37,13 +36,10 @@ void mythFFmpegEncoder::SuperFastRGB2yuv(int width, int height, int stride, cons
 			if (j % 2 == 0){
 				if (i % 2 == 0){
 					*uplanar = single->UU; uplanar++;
-					//((unsigned char**) dst)[1][uIndex++] = single->UU;
 				}
 				else{
 					*vplanar = single->VV; vplanar++;
-					//((unsigned char**) dst)[2][vindex++] = single->VV;
 				}
-				// u∑÷¡ø  
 			}
 		}
 	}

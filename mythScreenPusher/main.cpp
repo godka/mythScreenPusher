@@ -8,10 +8,9 @@ using namespace std;
 int main(int argc, char* argv [])
 {
 
-	mythScreenDecoder* decoder = mythScreenDecoder::CreateNew();
+	mythScreenDecoder* decoder = mythScreenDecoder::CreateNew("rtmp://localhost/live/stream");
 	if (decoder)
 		decoder->start();
-
 	return 0;
 }
 

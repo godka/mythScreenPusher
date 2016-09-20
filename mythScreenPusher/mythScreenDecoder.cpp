@@ -2,11 +2,12 @@
 #include <iostream>
 using namespace std;
 
-mythScreenDecoder::mythScreenDecoder()
+mythScreenDecoder::mythScreenDecoder(const char* rtmpurl)
 	:mythVirtualDecoder()
 {
 	flag = 0;
 	encoder = NULL;
+	_rtmpurl = rtmpurl;
 	//ptr = RTMPInit("rtmp://localhost/live/stream");
 	//Init();
 	pts = 0; dts = 0;
@@ -105,7 +106,7 @@ int mythScreenDecoder::pushthreadstatic(void* data)
 
 int mythScreenDecoder::pushthread()
 {
-	InitSrsRTMP("rtmp://localhost/live/stream");
+	InitSrsRTMP(_rtmpurl.c_str());
 	int time = SDL_GetTicks();
 	for (;;){
 		PacketQueue* pkt = get();
